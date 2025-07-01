@@ -25,4 +25,5 @@ Dieses Repository enthält ein PowerShell-Skript, das aggressive Botnet-IP-Feeds
 2. In PowerShell (als Administrator) in das Skript-Verzeichnis wechseln:  
    ```powershell
    cd C:\Pfad\zu\repo
+   .\block_bots.ps1
 
