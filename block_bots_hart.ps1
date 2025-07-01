@@ -1,73 +1,84 @@
 <#
 .SYNOPSIS
-  Blockiert aggressive Botnet-IP-Ranges via Windows-Firewall – robust gegen Kommentare und leere Zeilen.
+  Blockiert aggressive Botnet-IP-Ranges via Windows-Firewall – alle Botnet-Ranges wurden geblockt!
 
 .DESCRIPTION
   • Lädt Blocklisten von FeodoTracker, Spamhaus DROP und CINSArmy.  
   • Entfernt Kommentare („; …“) und Leerzeilen, trimmt Whitespace.  
-  • Filtert nur Zeilen, die mit einer IP oder CIDR beginnen.  
+  • Filtert nur Zeilen, die mit einer IP, CIDR oder Range beginnen.  
+  • Wandelt Einzel-IPv4-Adressen in /24-Netze um (z.B. 20.29.24.17 → 20.29.24.0/24).  
   • Legt für jede Range eine Inbound-Blockregel an (sofern noch nicht vorhanden).
 #>
 
-# Admin-Check
-if (-not ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent() `
-  ).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-  Write-Error "Bitte PowerShell als Administrator neu starten!"
-  exit 1
+# 0. Admin-Check
+if (-not ([Security.Principal.WindowsPrincipal]::new(
+        [Security.Principal.WindowsIdentity]::GetCurrent()
+    )).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")) {
+    Write-Error "❗ Bitte PowerShell als Administrator neu starten!"
+    Exit
 }
 
-# 1) Quellen
-$feeds = @{
-  "FeodoTracker" = "https://feodotracker.abuse.ch/downloads/ipblocklist.txt"
-  "SpamhausDROP" = "https://www.spamhaus.org/drop/drop.txt"
-  "CINSArmy"     = "https://cinsscore.com/list/ci-badguys.txt"
-}
-
-# 2) Hilfsfunktion: Zeile → saubere CIDR/IP
-function Parse-Line($line) {
-    # Kommentare abschneiden
-    $line = $line.Split(';')[0]
-    $line = $line.Trim()
-    # Nur Zeilen, die mit Ziffern oder IPv6 ([0-9a-f:]) beginnen
-    if ($line -match '^[0-9]{1,3}(\.[0-9]{1,3}){3}(\/\d{1,2})?$') {
-        return $line
-    }
-    return $null
-}
-
-$allRanges = [System.Collections.Generic.HashSet[string]]::new()
-
-# 3) Feeds laden und parsen
-foreach ($name in $feeds.Keys) {
-    $url = $feeds[$name]
+# 1. Hilfsfunktion: Liste von URLs laden und filtern
+function Import-IPsFromUrl {
+    param($url)
     try {
-        Write-Host "⏳ Lade Feed [$name]: $url"
-        $content = (Invoke-WebRequest -Uri $url -UseBasicParsing).Content
-        $content -split "`n" | ForEach-Object {
-            $cidr = Parse-Line $_
-            if ($cidr) { $allRanges.Add($cidr) | Out-Null }
+        (Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 30).Content `
+            -split "`n" |
+        ForEach-Object { $_.Trim() } |
+        Where-Object {
+            ($_ -and -not $_.StartsWith(';')) -and
+            ($_ -match '^(?:\d+\.\d+\.\d+\.\d+(?:/\d+)?|\d+\.\d+\.\d+\.\d+-\d+\.\d+\.\d+\.\d+)$')
         }
     }
     catch {
-        Write-Warning "⚠️ Fehler beim Laden von $name – übersprungen."
+        # Hier die Subexpressions, damit $url und $_ korrekt expandieren
+        Write-Warning "❗ Fehler beim Laden von $($url): $($_)"
+        return @()
     }
 }
 
-# 4) Block-Regeln anlegen
-Write-Host "`n🎯 Erstelle Block-Regeln für $($allRanges.Count) Ranges…" -ForegroundColor Cyan
-foreach ($cidr in $allRanges) {
-    $ruleName = "BlockBot_$($cidr.Replace('/','_'))"
-    if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) {
-        New-NetFirewallRule `
-          -DisplayName    $ruleName `
-          -Direction      Inbound `
-          -Action         Block `
-          -Profile        Any `
-          -RemoteAddress  $cidr `
-          -Description    "Block Botnet-Range $cidr"
-        Write-Host "⛔ Angelegt: $cidr"
+# 2. Hilfsfunktion: Einzel-IP → /24 umwandeln
+function Normalize-To24 {
+    param($entry)
+    if ($entry -match '^(\d+\.\d+\.\d+)\.\d+$') {
+        return "$($matches[1]).0/24"
+    }
+    else {
+        return $entry
+    }
+}
+
+# 3. Quellen definieren
+$blocklistUrls = @(
+    'https://feodotracker.abuse.ch/downloads/ipblocklist.csv',
+    'https://www.spamhaus.org/drop/drop.txt',
+    'https://cinsscore.com/list/ci-badguys.txt'
+)
+
+# 4. Ranges importieren und blocken
+foreach ($url in $blocklistUrls) {
+    Write-Host "`nLade Liste von $url …"
+    $entries = Import-IPsFromUrl $url
+
+    foreach ($entry in $entries) {
+        $cidr = Normalize-To24 $entry
+        $ruleName = "BlockBot_$($cidr -replace '[\/\-]','_')"
+
+        if (-not (Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue)) {
+            New-NetFirewallRule `
+                -DisplayName   $ruleName `
+                -Direction     Inbound `
+                -Action        Block `
+                -Profile       Any `
+                -RemoteAddress $cidr `
+                -Description   "Block Botnet-Range $cidr"
+            Write-Host "⛔ Angelegt: $cidr"
+        }
+        else {
+            Write-Host "✔ übersprungen (bereits vorhanden): $cidr"
+        }
     }
 }
 
 Write-Host "`n✅ Fertig – alle Botnet-Ranges wurden geblockt!" -ForegroundColor Green
+
