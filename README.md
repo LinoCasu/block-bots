@@ -28,5 +28,5 @@ Dieses Repository enthält ein PowerShell-Skript, das aggressive Botnet-IP-Feeds
    .\block_bots.ps1
    .\block_bots_hart.ps1
 
-<div class="tenor-gif-embed" data-postid="25111514" data-share-method="host" data-aspect-ratio="1.3913" data-width="100%"><a href="https://tenor.com/view/dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb-how-i-learned-to-stop-worrying-and-love-the-bomb-peter-sellers-gigantic-complex-of-computers-gif-25111514">Dr Strangelove Dr Strangelove Or How I Learned To Stop Worrying And Love The Bomb GIF</a>from <a href="https://tenor.com/search/dr+strangelove-gifs">Dr Strangelove GIFs</a></div> <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
-   
+![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/e2d78de6-7873-4459-9d45-614a64a25a67)
+
