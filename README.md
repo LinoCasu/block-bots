@@ -7,7 +7,7 @@ Dieses Repository enthält ein PowerShell-Skript, das aggressive Botnet-IP-Feeds
 ## Inhalt
 
 - `block_bots_hart.ps1` – Hauptskript zum Blockieren aller bekannten Botnetze  
-- `LICENSE` – (falls gewünscht) Lizenzinformation  
+
 
 ---
 
