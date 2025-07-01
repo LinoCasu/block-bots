@@ -25,7 +25,11 @@ Dieses Repository enthält ein PowerShell-Skript, das aggressive Botnet-IP-Feeds
 2. In PowerShell (als Administrator) in das Skript-Verzeichnis wechseln:  
    ```powershell
    cd C:\Pfad\zu\repo
+   #minimal
+   .\save_blocks.ps1
+   #additional
    .\block_bots.ps1
+   #hardening 
    .\block_bots_hart.ps1
 
 ![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/e2d78de6-7873-4459-9d45-614a64a25a67)
