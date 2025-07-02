@@ -50,6 +50,8 @@ This repository provides a small PowerShell toolkit that:
 > **Tip2:** change the left open ports inside save_block.ps1 as you need it.
 
 > **Tip3:** change wide ipranges into save_block.ps1 if they are too harsh.
+
+> **Tip4:** edit and enter your own domain url of your noip url or your server to unblock it inside save_block.ps1
 ---
 
 ## ⚙️ Requirements
