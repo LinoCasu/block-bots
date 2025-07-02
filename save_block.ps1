@@ -4,30 +4,30 @@
 Write-Host "🛡️  Konfiguriere sichere Firewallregeln..." -ForegroundColor Cyan
 
 # -------- ALLOW LIST --------
-$allowPorts = @(5000, 8088, 8089, 8090, 7522, 554, 4000, 443)
-$allowDNS = @("1.1.1.1", "8.8.8.8", "8.8.4.4")
-$allowDomains = @("error.sytes.net")  # Wird dynamisch aufgelöst
+$allowPorts   = @(5000, 8088, 8089, 8090, 7522, 554, 4000, 443)
+$allowDNS     = @("1.1.1.1", "8.8.8.8", "8.8.4.4")
+$allowDomains = @("YOUR_DOMAIN")  # Wird dynamisch aufgelöst
 
-# → Erlaube benötigte Ports (eingehend + ausgehend)
+# Erlaube benötigte Ports (eingehend + ausgehend)
 foreach ($port in $allowPorts) {
-    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_IN" -Direction Inbound -Protocol TCP -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
-    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_OUT" -Direction Outbound -Protocol TCP -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "ALLOW_PORT_${port}_IN"   -Direction Inbound  -LocalPort $port   -Protocol TCP -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "ALLOW_PORT_${port}_OUT"  -Direction Outbound -RemotePort $port  -Protocol TCP -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
-# → Erlaube DNS zu bekannten Servern
+# Erlaube DNS-Server (UDP/53, ausgehend)
 foreach ($dns in $allowDNS) {
-    New-NetFirewallRule -DisplayName "ALLOW_DNS_$dns" -Direction Outbound -RemoteAddress $dns -Protocol UDP -LocalPort 53 -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "ALLOW_DNS_${dns}"         -Direction Outbound -RemoteAddress $dns -Protocol UDP -RemotePort 53 -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
-# → Erlaube Domains wie YOUR URL
+# Erlaube Domains (aufgelöste IPs)
 foreach ($domain in $allowDomains) {
     try {
-        $ip = [System.Net.Dns]::GetHostAddresses($domain) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | Select-Object -First 1
-        if ($ip) {
-            New-NetFirewallRule -DisplayName "ALLOW_DOMAIN_$domain" -Direction Outbound -RemoteAddress $ip.IPAddressToString -Action Allow -Profile Any -Protocol Any -Enabled True
+        $addresses = (Resolve-DnsName $domain -ErrorAction Stop).IPAddress
+        foreach ($addr in $addresses) {
+            New-NetFirewallRule -DisplayName "ALLOW_DOMAIN_${domain}_${addr}" -Direction Outbound -RemoteAddress $addr -Protocol Any -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
         }
     } catch {
-        Write-Host "⚠️  Konnte $domain nicht auflösen – Regel übersprungen" -ForegroundColor Yellow
+        Write-Warning "Konnte Domain $domain nicht auflösen."
     }
 }
 
@@ -45,71 +45,65 @@ $ProtonWhitelist = @(
     '79.135.107.0/24'
 )
 
-# → Erlaube benötigte Ports (eingehend + ausgehend)
-foreach ($port in $allowPorts) {
-    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_IN"  -Direction Inbound  -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
-    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_OUT" -Direction Outbound -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+# Erlaube Proton AG IP-Ranges (eingehend + ausgehend)
+foreach ($range in $ProtonWhitelist) {
+    New-NetFirewallRule -DisplayName "ALLOW_PROTON_${range}_IN"  -Direction Inbound  -RemoteAddress $range -Protocol Any -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "ALLOW_PROTON_${range}_OUT" -Direction Outbound -RemoteAddress $range -Protocol Any -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
-# … dein Code zum Erlauben von DNS und Domains …
-
 # -------- BLOCK LIST --------
-
 # ⚫ Botnetz- & Scam-Ranges (aus Screenshots & bekannten Quellen)
 $blockRanges = @(
-    "104.234.0.0/16", # OVH / Scammer Hosting
-    "141.0.0.0/8",    # Brute-Force/Spam
-    "94.0.0.0/8",     # Botnets & Scam-Infrastruktur
-    "91.0.0.0/8",     # Spezifischer Host aus Screenshot
-    "185.0.0.0/8",    # Verdächtig / teils Tor
-    "154.0.0.0/8",    # Scam-/Phishing-Zielnetz
+    "104.234.0.0/16",  # OVH / Scammer Hosting
+    "141.0.0.0/8",     # Brute-Force/Spam
+    "94.0.0.0/8",      # Botnets & Scam-Infrastruktur
+    "91.0.0.0/8",      # Spezifischer Host aus Screenshot
+    "185.0.0.0/8",     # Verdächtig / teils Tor
+    "154.0.0.0/8",     # Scam-/Phishing-Zielnetz
     "134.0.0.0/8",
-    "94.0.0.0/8",
     "138.0.0.0/8",
-    "165.0.0.0/8"
-	"89.0.0.0/8"
-	"18.0.0.0/8"
-	"192.81.0.0/16"
-	"80.0.0.0/8"
-	"45.0.0.0/8"
-	"206.0.0.0/8"
-	"87.0.0.0/8"
-	"3.0.0.0/8"
-	"46.0.0.0/8"
-	"64.0.0.0/8"
-	"51.0.0.0/8"
-	"45.0.0.0/8"
-	"47.0.0.0/8"
-	"20.0.0.0/8"
+    "165.0.0.0/8",
+    "89.0.0.0/8",
+    "18.0.0.0/8",
+    "192.81.0.0/16",
+    "80.0.0.0/8",
+    "45.0.0.0/8",
+    "206.0.0.0/8",
+    "87.0.0.0/8",
+    "3.0.0.0/8",
+    "46.0.0.0/8",
+    "64.0.0.0/8",
+    "51.0.0.0/8",
+    "47.0.0.0/8",
+    "20.0.0.0/8"
 )
 
 foreach ($range in $blockRanges) {
-    New-NetFirewallRule -DisplayName "BLOCK_SCAM_$range" -Direction Outbound -RemoteAddress $range -Action Block -Profile Any -Protocol Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "BLOCK_BOTNET_${range}_IN"  -Direction Inbound  -RemoteAddress $range -Protocol Any -Action Block -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "BLOCK_BOTNET_${range}_OUT" -Direction Outbound -RemoteAddress $range -Protocol Any -Action Block -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
 # ⚫ Microsoft & Windows Telemetrie
 $telemetryRanges = @(
-    "13.107.0.0/16",    # Microsoft
-    "40.76.0.0/14",     # Microsoft
-    "65.52.0.0/14",     # Microsoft
-    "131.107.0.0/16",   # Microsoft
-    "157.55.0.0/16",    # Microsoft
-    "207.46.0.0/16"     # Microsoft
+    "13.107.0.0/16",   # Microsoft
+    "40.76.0.0/14",    # Microsoft
+    "65.52.0.0/14",    # Microsoft
+    "131.107.0.0/16",  # Microsoft
+    "157.55.0.0/16",   # Microsoft
+    "207.46.0.0/16"    # Microsoft
 )
-
 foreach ($range in $telemetryRanges) {
-    New-NetFirewallRule -DisplayName "BLOCK_TELEMETRY_$range" -Direction Outbound -RemoteAddress $range -Action Block -Profile Any -Protocol Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "BLOCK_TELEMETRY_${range}" -Direction Inbound  -RemoteAddress $range -Protocol Any -Action Block -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
 # ⚫ Google Tracking (ohne DNS!)
 $googleTrackers = @(
-    "142.250.0.0/16",   # Google (allg.)
-    "172.217.0.0/16",   # Google Tracking
-    "216.58.0.0/16"     # Google Services
+    "142.250.0.0/16",  # Google (allg.)
+    "172.217.0.0/16",  # Google Tracking
+    "216.58.0.0/16"    # Google Services
 )
-
 foreach ($range in $googleTrackers) {
-    New-NetFirewallRule -DisplayName "BLOCK_GOOGLE_$range" -Direction Outbound -RemoteAddress $range -Action Block -Profile Any -Protocol Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "BLOCK_GOOGLE_${range}" -Direction Outbound -RemoteAddress $range -Protocol Any -Action Block -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
 Write-Host "`n✅ Fertig! Wichtige Dienste erlaubt – Bots & Telemetrie geblockt." -ForegroundColor Green
