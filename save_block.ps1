@@ -19,7 +19,7 @@ foreach ($dns in $allowDNS) {
     New-NetFirewallRule -DisplayName "ALLOW_DNS_$dns" -Direction Outbound -RemoteAddress $dns -Protocol UDP -LocalPort 53 -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
-# → Erlaube Domains wie error.sytes.net
+# → Erlaube Domains wie YOUR URL
 foreach ($domain in $allowDomains) {
     try {
         $ip = [System.Net.Dns]::GetHostAddresses($domain) | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | Select-Object -First 1
@@ -36,18 +36,32 @@ foreach ($domain in $allowDomains) {
 # ⚫ Botnetz- & Scam-Ranges (aus Screenshots & bekannten Quellen)
 $blockRanges = @(
     "104.234.0.0/16",   # OVH / Scammer Hosting
-    "141.98.0.0/16",    # Brute-Force/Spam
-    "185.234.0.0/16",   # Ransomware / Scam
-    "185.107.0.0/16",   # Bulletproof Hosting
-    "94.103.0.0/16",    # Botnets & Scam-Infrastruktur
-    "91.219.236.0/24",  # Spezifischer Host aus Screenshot
-    "185.220.101.0/24", # Verdächtig / teils Tor
-    "185.180.6.0/24",   # Scam-/Phishing-Zielnetz
-    "154.0.0.0/16",
-    "134.0.0.0/16",
-    "94.0.0.0/16",
-    "138.0.0.0/16",
-    "165.0.0.0/16"
+    "141.0.0.0/8",    # Brute-Force/Spam
+    "185.0.0.0/8",   # Ransomware / Scam
+    "185.0.0.0/8",   # Bulletproof Hosting
+    "94.0.0.0/8",    # Botnets & Scam-Infrastruktur
+    "91.0.0.0/8",  # Spezifischer Host aus Screenshot
+    "185.0.0.0/8", # Verdächtig / teils Tor
+    "185.0.0.0/8",   # Scam-/Phishing-Zielnetz
+    "154.0.0.0/8",
+    "134.0.0.0/8",
+    "94.0.0.0/8",
+    "138.0.0.0/8",
+    "165.0.0.0/8"
+	"89.0.0.0/8"
+	"18.0.0.0/8"
+	"192.81.0.0/16"
+	"80.0.0.0/8"
+	"45.0.0.0/8"
+	"206.0.0.0/8"
+	"87.0.0.0/8"
+	"3.0.0.0/8"
+	"46.0.0.0/8"
+	"64.0.0.0/8"
+	"51.0.0.0/8"
+	"45.0.0.0/8"
+	"47.0.0.0/8"
+	"20.0.0.0/8"
 )
 
 foreach ($range in $blockRanges) {
