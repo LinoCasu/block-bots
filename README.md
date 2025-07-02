@@ -1,5 +1,3 @@
----
-
 ## Windows Firewall Botnet Hardening
 
 This repository provides a small PowerShell toolkit that:
