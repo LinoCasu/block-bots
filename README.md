@@ -2,6 +2,17 @@
 
 ![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/e2d78de6-7873-4459-9d45-614a64a25a67)
 
+For anyone who really wants to go full “hardcore,” here’s a botnet IP blocker I scripted myself. But beware:
+
+Adjust the ports you need open according to your own specifications.
+
+Used together, these three scripts will block half the Internet— they’re extremely aggressive. If you’re still getting port scans or other botnet attacks after running them, you’ve truly tangled with a botnet; there probably won’t be much of one left.
+
+If you run all three at once, they’re so ruthless they might be overkill for a single user—but they cover over 16,000 IP ranges known for botnet activity. In the worst case you’ll end up blocking Bulgaria and parts of Africa and Asia—but if you still aren’t safe with these scripts plus Malwarebytes and AdGuard, I’d be surprised.
+
+P.S. You’ll need to tailor them to your own needs.
+---
+
 This repository provides a small PowerShell toolkit that:
 
 1. **Automatically downloads** aggressive botnet IP feeds
