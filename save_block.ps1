@@ -31,19 +31,38 @@ foreach ($domain in $allowDomains) {
     }
 }
 
+# -------- PROTON AG WHITELIST --------
+$ProtonWhitelist = @(
+    '109.224.244.0/24',
+    '176.119.200.0/24',
+    '185.205.70.0/24',
+    '185.70.40.0/24',
+    '185.70.41.0/24',
+    '185.70.42.0/24',
+    '185.70.43.0/24',
+    '194.0.147.0/24',
+    '79.135.106.0/24',
+    '79.135.107.0/24'
+)
+
+# → Erlaube benötigte Ports (eingehend + ausgehend)
+foreach ($port in $allowPorts) {
+    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_IN"  -Direction Inbound  -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+    New-NetFirewallRule -DisplayName "ALLOW_PORT_$port_OUT" -Direction Outbound -LocalPort $port -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
+}
+
+# … dein Code zum Erlauben von DNS und Domains …
+
 # -------- BLOCK LIST --------
 
 # ⚫ Botnetz- & Scam-Ranges (aus Screenshots & bekannten Quellen)
 $blockRanges = @(
-    "104.234.0.0/16",   # OVH / Scammer Hosting
+    "104.234.0.0/16", # OVH / Scammer Hosting
     "141.0.0.0/8",    # Brute-Force/Spam
-    "185.0.0.0/8",   # Ransomware / Scam
-    "185.0.0.0/8",   # Bulletproof Hosting
-    "94.0.0.0/8",    # Botnets & Scam-Infrastruktur
-    "91.0.0.0/8",  # Spezifischer Host aus Screenshot
-    "185.0.0.0/8", # Verdächtig / teils Tor
-    "185.0.0.0/8",   # Scam-/Phishing-Zielnetz
-    "154.0.0.0/8",
+    "94.0.0.0/8",     # Botnets & Scam-Infrastruktur
+    "91.0.0.0/8",     # Spezifischer Host aus Screenshot
+    "185.0.0.0/8",    # Verdächtig / teils Tor
+    "154.0.0.0/8",    # Scam-/Phishing-Zielnetz
     "134.0.0.0/8",
     "94.0.0.0/8",
     "138.0.0.0/8",
