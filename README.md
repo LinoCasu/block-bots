@@ -77,7 +77,7 @@ This repository provides a small PowerShell toolkit that:
 
    # hardening: fetch, block, and apply extra firewall policies
    .\block_bots_hart.ps1
-   ``` :contentReference[oaicite:3]{index=3}
+   ``` 
    ````
 
 ---
