@@ -1,5 +1,3 @@
-Here’s the README again in English, now with an extra reminder to tailor your open-port settings:
-
 ---
 
 ## Windows Firewall Botnet Hardening
