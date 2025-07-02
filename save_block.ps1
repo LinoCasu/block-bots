@@ -57,7 +57,7 @@ $blockRanges = @(
     "104.234.0.0/16",  # OVH / Scammer Hosting
     "141.0.0.0/8",     # Brute-Force/Spam
     "94.0.0.0/8",      # Botnets & Scam-Infrastruktur
-    "91.0.0.0/8",      # Spezifischer Host aus Screenshot
+    "91.0.0.0/8",      # Spezifischer Host aus Malewarebyte-Logs
     "154.0.0.0/8",     # Scam-/Phishing-Zielnetz
     "134.0.0.0/8",
     "138.0.0.0/8",
