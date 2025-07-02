@@ -2,7 +2,9 @@
 
 ![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/e2d78de6-7873-4459-9d45-614a64a25a67)
 
-For anyone who really wants to go full “hardcore,” here’s a botnet IP blocker I scripted myself. But beware:
+For anyone who really wants to go full “hardcore,” here’s a botnet IP blocker I scripted myself. 
+
+**But beware:**
 
 Adjust the ports you need open according to your own specifications.
 
