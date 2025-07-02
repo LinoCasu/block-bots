@@ -59,6 +59,7 @@ This repository provides a small PowerShell toolkit that:
 ---
 
 By separating “fetch,” “block,” and “hardening” into three scripts, you get full control over each step—ideal for testing in a lab before rolling out to production. If you’d like even deeper insight into each rule or feed source, you can open the `.ps1` files directly; they’re heavily commented to guide you through every Firewall API call.
+![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/508fba02-e67c-4b91-b615-e5d009cbee7e)
 
 
 ![dr-strangelove-dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb](https://github.com/user-attachments/assets/e2d78de6-7873-4459-9d45-614a64a25a67)
