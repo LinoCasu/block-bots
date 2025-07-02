@@ -51,6 +51,33 @@ foreach ($range in $ProtonWhitelist) {
     New-NetFirewallRule -DisplayName "ALLOW_PROTON_${range}_OUT" -Direction Outbound -RemoteAddress $range -Protocol Any -Action Allow -Profile Any -Enabled True -ErrorAction SilentlyContinue
 }
 
+# --- Google News Whitelist (Anycast-IPs dynamisch ermitteln) ---
+try {
+    $GoogleNewsWhitelist = Resolve-DnsName news.google.com -Type A `
+        | Select-Object -ExpandProperty IPAddress `
+        | ForEach-Object { "$($_)/32" }
+} catch {
+    Write-Warning "⚠️ Konnte news.google.com nicht auflösen – Google-News-IPs werden nicht gefiltert."
+    $GoogleNewsWhitelist = @()
+}
+
+# (optional: wenn Du statisch bleiben willst, statt Resolve-DnsName einfach manuell befüllen)
+# $GoogleNewsWhitelist = @('142.250.176.195/32','142.250.176.193/32', …)
+
+# … weiter unten, nachdem Du alle Feeds in $AllRanges geladen hast …
+# Beispiel bei Dir vielleicht so benannt:
+# $AllRanges = Import-Feeds | Sort-Object –Unique
+
+# → Entferne vor dem Speichern alle Google-News-IPs
+$AllRanges = $AllRanges | Where-Object {
+    -not ($GoogleNewsWhitelist -contains $_)
+}
+
+# jetzt erst: $AllRanges in JSON/CSV dumpen
+# z.B.:
+# $AllRanges | ConvertTo-Json | Out-File feeds.json
+
+
 # -------- BLOCK LIST --------
 # ⚫ Botnetz- & Scam-Ranges (aus Malewarebyte-Logs & bekannten Quellen)
 $blockRanges = @(
