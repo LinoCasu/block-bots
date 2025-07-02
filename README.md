@@ -27,7 +27,7 @@ This repository provides a small PowerShell toolkit that:
   * Ensures the block rules are applied in the correct order for maximum effect
 
 > **Tip:** you can run the scripts one by one to see exactly what each does, or simply run the hardening script to do everything in sequence.
-
+> **Tip2:** change the left open ports inside save_block.ps1 as you need it.
 ---
 
 ## ⚙️ Requirements
