@@ -52,7 +52,7 @@ foreach ($range in $ProtonWhitelist) {
 }
 
 # -------- BLOCK LIST --------
-# ⚫ Botnetz- & Scam-Ranges (aus Screenshots & bekannten Quellen)
+# ⚫ Botnetz- & Scam-Ranges (aus Malewarebyte-Logs & bekannten Quellen)
 $blockRanges = @(
     "104.234.0.0/16",  # OVH / Scammer Hosting
     "141.0.0.0/8",     # Brute-Force/Spam
